@@ -1,0 +1,57 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["testimonials"]
+}
+
+model User {
+  id        String    @id @default(uuid())
+  visitorId String    @unique
+  email     String    @unique
+  name      String?
+  plan      String    @default("free")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  projects  Project[]
+
+  @@schema("testimonials")
+}
+
+model Project {
+  id           String        @id @default(uuid())
+  name         String
+  slug         String        @unique
+  website      String?
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  testimonials Testimonial[]
+
+  @@schema("testimonials")
+}
+
+model Testimonial {
+  id          String   @id @default(uuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String
+  email       String?
+  company     String?
+  role        String?
+  content     String
+  rating      Int?     @default(5)
+  avatarUrl   String?
+  videoUrl    String?
+  status      String   @default("pending")
+  isFeatured  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@schema("testimonials")
+}
